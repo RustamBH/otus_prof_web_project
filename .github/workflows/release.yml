@@ -22,7 +22,8 @@ jobs:
         sudo apt-get install -y build-essential cmake libssl-dev libboost-all-dev googletest     
 
     - name: Build
-      run: cmake --build ${{github.workspace}}/server/build --config ${{env.BUILD_TYPE}}
+      #run: cmake --build ${{github.workspace}}/server/build --config ${{env.BUILD_TYPE}}      
+      run: cmake --build . --target all
 
     - name: Run tests
       working-directory: ${{github.workspace}}/server/test
