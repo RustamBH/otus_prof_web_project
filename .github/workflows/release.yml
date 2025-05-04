@@ -22,8 +22,8 @@ jobs:
         sudo apt-get install -y build-essential cmake libssl-dev libboost-all-dev googletest     
 
     - name: Build
-      run: cmake --build . --config ${{env.BUILD_TYPE}}
+      run: cmake --build ${{github.workspace}}/server/build --config ${{env.BUILD_TYPE}}
 
     - name: Run tests
-      working-directory: ${{github.workspace}}/build
+      working-directory: ${{github.workspace}}/server/test
       run: ctest -C ${{env.BUILD_TYPE}} --output-on-failure
