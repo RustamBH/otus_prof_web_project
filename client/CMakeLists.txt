@@ -20,7 +20,7 @@ include_directories(${OPENSSL_INCLUDE_DIR})
 
 # Настройки для Boost
 SET(Boost_USE_STATIC_LIBS ON)
-find_package(Boost REQUIRED COMPONENTS system filesystem thread)
+find_package(Boost REQUIRED COMPONENTS system thread)
 include_directories(${Boost_INCLUDE_DIRS})
 
 # Настройки для GTest
