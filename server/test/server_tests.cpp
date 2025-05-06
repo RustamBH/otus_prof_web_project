@@ -21,7 +21,6 @@ TEST(RequestHandlerTest, HandleValidRequest) {
 	client.request("localhost", "4433", "/index.html");
 	
 	EXPECT_TRUE(response.find("HTTP/1.1 200 OK") != std::string::npos);
-
 }
 
 TEST(RequestHandlerTest, HandleNotFound) {
