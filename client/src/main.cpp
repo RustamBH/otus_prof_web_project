@@ -15,7 +15,7 @@ int main(int argc, char* argv[]) {
         net::io_context ioc;
         ssl::context ctx{ ssl::context::tlsv12_client };
 
-        // Настройка SSL контекста клиента
+        // РќР°СЃС‚СЂРѕР№РєР° SSL РєРѕРЅС‚РµРєСЃС‚Р° РєР»РёРµРЅС‚Р°
         ctx.set_default_verify_paths();
         ctx.set_verify_mode(ssl::verify_none); // verify_peer
 
