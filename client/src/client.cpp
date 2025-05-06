@@ -1,6 +1,5 @@
 #include "client.hpp"
 
-
 namespace beast = boost::beast;
 namespace http = beast::http;
 namespace net = boost::asio;
