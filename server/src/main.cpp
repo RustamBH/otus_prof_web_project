@@ -15,26 +15,26 @@ int main(int argc, char* argv[]) {
         std::string doc_root = argv[3];
         auto const threads = std::max<int>(1, std::atoi(argv[4]));
 
-        // SSL контекст
+        // SSL РєРѕРЅС‚РµРєСЃС‚
         ssl::context ctx{ ssl::context::tlsv12 };
         ctx.set_options(
             ssl::context::default_workarounds |
             ssl::context::no_sslv2 |
             ssl::context::single_dh_use);
 
-        // Загружаем сертификат и приватный ключ
+        // Р—Р°РіСЂСѓР¶Р°РµРј СЃРµСЂС‚РёС„РёРєР°С‚ Рё РїСЂРёРІР°С‚РЅС‹Р№ РєР»СЋС‡
         ctx.use_certificate_chain_file("server.crt");
         ctx.use_private_key_file("server.key", ssl::context::pem);
 
-        // IO контекст
+        // IO РєРѕРЅС‚РµРєСЃС‚
         net::io_context ioc{ threads };
 
-        // Создаем и запускаем сервер
+        // РЎРѕР·РґР°РµРј Рё Р·Р°РїСѓСЃРєР°РµРј СЃРµСЂРІРµСЂ
         https_server::http_server server{ ioc, ctx, tcp::endpoint{address, port}, doc_root , static_cast<std::size_t>(threads) };
         std::cout << "HTTPS server started on port " << port << " with " << threads << " threads\n";
         server.start();
 
-        // Запускаем pool потоков для обработки IO
+        // Р—Р°РїСѓСЃРєР°РµРј pool РїРѕС‚РѕРєРѕРІ РґР»СЏ РѕР±СЂР°Р±РѕС‚РєРё IO
         std::vector<std::thread> v;
         v.reserve(threads - 1);
         for (auto i = threads - 1; i > 0; --i) {
@@ -42,7 +42,7 @@ int main(int argc, char* argv[]) {
         }
         ioc.run();
 
-        // Ждем завершения всех потоков
+        // Р–РґРµРј Р·Р°РІРµСЂС€РµРЅРёСЏ РІСЃРµС… РїРѕС‚РѕРєРѕРІ
         for (auto& t : v) {
             t.join();
         }
