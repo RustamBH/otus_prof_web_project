@@ -33,7 +33,7 @@ namespace https_server {
             request_,
             [this, self](beast::error_code ec, std::size_t bytes_transferred) {
                 if (!ec) {
-                    // Ïåðåäà÷à îáðàáîòêè çàïðîñà â ïóë ïîòîêîâ
+                    // Передача обработки запроса в пул потоков
                     thread_pool_.enqueue([self = shared_from_this()] {
                         self->process_request();
                         });
