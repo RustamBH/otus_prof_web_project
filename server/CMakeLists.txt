@@ -9,7 +9,7 @@ set(PROJECT_VESRION 0.0.${PATCH_VERSION})
 
 #--------------------------------------------------------------------------------------------------
 # variables
-set(PROJECT_NAME server)
+set(PROJECT_NAME https_server)
 
 # enable C and C++ language
 enable_language(C CXX)
