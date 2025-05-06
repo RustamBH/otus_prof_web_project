@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
-#include "../src/server/request_handler.hpp"
+#include "../src/server.hpp"
+#include "../src/server.cpp"
 
 using namespace https_server;
 
