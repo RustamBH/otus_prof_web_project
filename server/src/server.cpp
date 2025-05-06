@@ -41,81 +41,73 @@ namespace https_server {
             });
     }
 
-    void http_connection::process_request() {
-        try {
-            response_.version(request_.version());
-            response_.keep_alive(false);
+    void http_connection::process_request() {      
+        response_.version(request_.version());
+        response_.keep_alive(false);
 
-            // Проверяем метод (поддерживаем только GET)
-            if (request_.method() != http::verb::get) {
-                response_.result(http::status::bad_request);
-                response_.set(http::field::content_type, "text/plain");
-                beast::ostream(response_.body()) << "Invalid method\n";
-                return write_response();
-            }
-
-            // Безопасное формирование пути к файлу
-            std::string request_path = std::string{ request_.target() };
-            if (request_path.empty() || request_path[0] != '/' ||
-                request_path.find("..") != std::string::npos) {
-                response_.result(http::status::bad_request);
-                response_.set(http::field::content_type, "text/plain");
-                beast::ostream(response_.body()) << "Invalid request\n";
-                return write_response();
-            }
-
-            // Если запрос заканчивается на /, добавляем index.html
-            if (request_path.back() == '/') {
-                request_path += "index.html";
-            }
-
-            // Формируем полный путь к файлу
-            std::string full_path = doc_root_ + request_path;
-
-            // Пытаемся открыть файл
-            std::ifstream file(full_path, std::ios::in | std::ios::binary);
-            if (!file) {
-                response_.result(http::status::not_found);
-                response_.set(http::field::content_type, "text/plain");
-                beast::ostream(response_.body()) << "File not found\n";
-                return write_response();
-            }
-
-            // Читаем файл и формируем ответ
-            std::ostringstream file_content;
-            file_content << file.rdbuf();
-            response_.result(http::status::ok);
-
-            // Определяем Content-Type по расширению файла
-            std::string content_type = "text/plain";
-            if (full_path.find(".html") != std::string::npos) {
-                content_type = "text/html";
-            }
-            else if (full_path.find(".css") != std::string::npos) {
-                content_type = "text/css";
-            }
-            else if (full_path.find(".js") != std::string::npos) {
-                content_type = "application/javascript";
-            }
-            else if (full_path.find(".png") != std::string::npos) {
-                content_type = "image/png";
-            }
-            else if (full_path.find(".jpg") != std::string::npos ||
-                full_path.find(".jpeg") != std::string::npos) {
-                content_type = "image/jpeg";
-            }
-
-            response_.set(http::field::content_type, content_type);
-            beast::ostream(response_.body()) << file_content.str();
-            write_response();
+        // Проверяем метод (поддерживаем только GET)
+        if (request_.method() != http::verb::get) {
+            response_.result(http::status::bad_request);
+            response_.set(http::field::content_type, "text/plain");
+            beast::ostream(response_.body()) << "Invalid method\n";
+            return write_response();
         }
-        catch (const std::exception& e) {
-            // Если файл не найден, отправляем 404        
-            response_.set(http::field::server, "Boost.Asio HTTPS Server");
-            response_.set(http::field::content_type, "text/html");
-            beast::ostream(response_.body()) << "404 Not Found\n";
-            write_response();
+
+        // Безопасное формирование пути к файлу
+        std::string request_path = std::string{ request_.target() };
+        if (request_path.empty() || request_path[0] != '/' ||
+            request_path.find("..") != std::string::npos) {
+            response_.result(http::status::bad_request);
+            response_.set(http::field::content_type, "text/plain");
+            beast::ostream(response_.body()) << "Invalid request\n";
+            return write_response();
         }
+
+        // Если запрос заканчивается на /, добавляем index.html
+        if (request_path.back() == '/') {
+            request_path += "index.html";
+        }
+
+        // Формируем полный путь к файлу
+        std::string full_path = doc_root_ + request_path;
+
+        // Пытаемся открыть файл
+        std::ifstream file(full_path, std::ios::in | std::ios::binary);
+        if (!file) {
+            response_.result(http::status::not_found);
+            response_.set(http::field::content_type, "text/plain");
+            beast::ostream(response_.body()) << "File not found\n";
+            return write_response();
+        }
+
+        // Читаем файл и формируем ответ
+        std::ostringstream file_content;
+        file_content << file.rdbuf();
+        response_.result(http::status::ok);
+
+        // Определяем Content-Type по расширению файла
+        std::string content_type = "text/plain";
+        if (full_path.find(".html") != std::string::npos) {
+            content_type = "text/html";
+        }
+        else if (full_path.find(".css") != std::string::npos) {
+            content_type = "text/css";
+        }
+        else if (full_path.find(".js") != std::string::npos) {
+            content_type = "application/javascript";
+        }
+        else if (full_path.find(".png") != std::string::npos) {
+            content_type = "image/png";
+        }
+        else if (full_path.find(".jpg") != std::string::npos ||
+            full_path.find(".jpeg") != std::string::npos) {
+            content_type = "image/jpeg";
+        }
+
+        response_.set(http::field::content_type, content_type);
+        beast::ostream(response_.body()) << file_content.str();
+        write_response();
+
     }
 
     void http_connection::write_response() {
