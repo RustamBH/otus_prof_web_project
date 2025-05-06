@@ -88,4 +88,8 @@ namespace https_client {
             std::cerr << "Shutdown failed: " << ec.message() << "\n";
         }
     }
+
+    std::string HttpsClient::get_response() {
+        return res_.body().c_str();
+    }
 } // namespace https_client
