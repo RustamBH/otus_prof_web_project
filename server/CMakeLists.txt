@@ -1,12 +1,18 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.15)
+
+if(POLICY CMP0167)
+  cmake_policy(SET CMP0167 NEW)
+endif()
 
 set(PATCH_VERSION "1" CACHE INTERNAL "Patch version")
 set(PROJECT_VESRION 0.0.${PATCH_VERSION})
 
-
 #--------------------------------------------------------------------------------------------------
 # variables
 set(PROJECT_NAME server)
+
+# enable C and C++ language
+enable_language(C CXX)
 
 set(SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
 set(TEST_DIR ${CMAKE_CURRENT_SOURCE_DIR}/test)
@@ -17,16 +23,18 @@ set(TEST_NAME UnitTest)
 find_package(OpenSSL REQUIRED)
 include_directories(${OPENSSL_INCLUDE_DIR})
 
+find_package(Threads REQUIRED)
 
 # Настройки для Boost
 SET(Boost_USE_STATIC_LIBS ON)
-find_package(Boost REQUIRED COMPONENTS system thread)
+find_package(Boost REQUIRED COMPONENTS system filesystem thread)
 include_directories(${Boost_INCLUDE_DIRS})
 
 # Настройки для GTest
 enable_testing()
 include(GoogleTest)
 find_package(GTest REQUIRED)
+include_directories(${GTEST_INCLUDE_DIR})
 
 #--------------------------------------------------------------------------------------------------
 # project
@@ -39,26 +47,15 @@ add_executable(
     ${PROJECT_NAME}
 	${SRC_DIR}/main.cpp
     ${SRC_DIR}/server.cpp
-    ${SRC_DIR}/server.h
+    ${SRC_DIR}/server.hpp
 )
 
-target_link_libraries(${PROJECT_NAME} ${OPENSSL_LIBRARIES} ${Boost_LIBRARIES})
-
+target_link_libraries(${PROJECT_NAME} ${CMAKE_THREAD_LIBS_INIT} ${OPENSSL_LIBRARIES} ${Boost_LIBRARIES} ${GTEST_LIBRARY} ${GTEST_MAIN_LIBRARY})
 
 # Test target
 add_executable(
     ${TEST_NAME} 
     ${TEST_DIR}/server_tests.cpp
-)
-
-# Add src to the include directories for the test target
-target_include_directories(
-    ${TEST_NAME} PRIVATE    
-	${SRC_DIR}
-	${GTEST_INCLUDE_DIRS}
-	${GTEST_LIBRARY} 
-	${GTEST_INCLUDE_DIR}
-	${GTEST_MAIN_LIBRARY}	
 )
 
 # Link test target against gtest libraries
@@ -73,27 +70,6 @@ add_test(NAME ${TEST_NAME} COMMAND ${TEST_NAME})
 # properties
 set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)
 set_target_properties(${TEST_NAME} PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)
-
-if (MSVC)
-    target_compile_options(
-        server PRIVATE
-        /W4
-    )
-    target_compile_options(
-        test_myvector PRIVATE
-        /W4
-    )
-else ()
-    target_compile_options(
-        server PRIVATE
-        -Wall -Wextra -pedantic -Werror
-    )
-    target_compile_options(
-        test_server PRIVATE
-        -Wall -Wextra -pedantic -Werror
-    )
-endif()
-
 
 #--------------------------------------------------------------------------------------------------
 # deb pkg
