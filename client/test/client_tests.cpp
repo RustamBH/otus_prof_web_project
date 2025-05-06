@@ -21,8 +21,7 @@ TEST(ClientTest, HandleInvalidPath) {
 	ssl::context ctx{ ssl::context::tlsv12_client };	
         
 	ctx.set_default_verify_paths();
-        ctx.set_verify_mode(ssl::verify_none); // verify_peer		
-	
+        ctx.set_verify_mode(ssl::verify_none); // verify_peer
 	   
 	https_client::HttpsClient client{ ioc, ctx };
 	client.request("localhost", "4433", "/nonexistent");   
