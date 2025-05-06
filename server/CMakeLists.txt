@@ -17,7 +17,7 @@ enable_language(C CXX)
 set(SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
 set(TEST_DIR ${CMAKE_CURRENT_SOURCE_DIR}/test)
 
-set(TEST_NAME UnitTest)
+set(TEST_NAME server_tests)
 
 # Настройки для OpenSSL
 find_package(OpenSSL REQUIRED)
