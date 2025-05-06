@@ -107,7 +107,6 @@ namespace https_server {
         response_.set(http::field::content_type, content_type);
         beast::ostream(response_.body()) << file_content.str();
         write_response();
-
     }
 
     void http_connection::write_response() {
