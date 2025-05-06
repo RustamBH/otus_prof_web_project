@@ -29,4 +29,4 @@ g++ -std=c++17 -o client client.cpp -lboost_system -lssl -lcrypto
 ./https_server 127.0.0.1 4433 ./www 3
 
 6. Запустите клиент:
-./https_client localhost 443 /index.html
+./https_client localhost 4433 /index.html
