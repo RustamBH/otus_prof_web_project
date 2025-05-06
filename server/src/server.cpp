@@ -120,8 +120,7 @@ namespace https_server {
             [self](beast::error_code ec, std::size_t) {
                 // После отправки ответа закрываем соединение
                 self->stream_.async_shutdown(
-                    [self](beast::error_code ec) {
-                        // Èãíîðèðóåì îøèáêó shutdown
+                    [self](beast::error_code ec) {                        
                         if (ec == net::error::eof || ec == ssl::error::stream_truncated) {
                             ec = {};
                         }
