@@ -37,8 +37,7 @@ TEST(RequestHandlerTest, HandleNotFound) {
 	EXPECT_TRUE(response.find("HTTP/1.1 404 Not Found") != std::string::npos);	
 }
 
-TEST(RequestHandlerTest, HandleDirectoryTraversal) {
-	
+TEST(RequestHandlerTest, HandleDirectoryTraversal) {	
 	net::io_context ioc;
 	ssl::context ctx{ ssl::context::tlsv12_client };
 
