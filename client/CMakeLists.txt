@@ -1,32 +1,40 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.15)
+
+if(POLICY CMP0167)
+  cmake_policy(SET CMP0167 NEW)
+endif()
 
 set(PATCH_VERSION "1" CACHE INTERNAL "Patch version")
 set(PROJECT_VESRION 0.0.${PATCH_VERSION})
 
-
 #--------------------------------------------------------------------------------------------------
 # variables
-set(PROJECT_NAME client)
+set(PROJECT_NAME https_client)
+
+# enable C and C++ language
+enable_language(C CXX)
 
 set(SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
 set(TEST_DIR ${CMAKE_CURRENT_SOURCE_DIR}/test)
 
-set(TEST_NAME UnitTest)
+set(TEST_NAME client_tests)
 
 # Настройки для OpenSSL
 find_package(OpenSSL REQUIRED)
 include_directories(${OPENSSL_INCLUDE_DIR})
 
+find_package(Threads REQUIRED)
 
 # Настройки для Boost
 SET(Boost_USE_STATIC_LIBS ON)
-find_package(Boost REQUIRED COMPONENTS system thread)
+find_package(Boost REQUIRED COMPONENTS system filesystem thread)
 include_directories(${Boost_INCLUDE_DIRS})
 
 # Настройки для GTest
 enable_testing()
 include(GoogleTest)
 find_package(GTest REQUIRED)
+include_directories(${GTEST_INCLUDE_DIR})
 
 #--------------------------------------------------------------------------------------------------
 # project
@@ -37,13 +45,15 @@ project(${PROJECT_NAME} VERSION ${PROJECT_VESRION})
 # Main target
 add_executable(
     ${PROJECT_NAME}
-	${SRC_DIR}/main.cpp
+    ${SRC_DIR}/main.cpp
     ${SRC_DIR}/client.cpp
-    ${SRC_DIR}/client.h
+    ${SRC_DIR}/client.hpp
 )
 
-target_link_libraries(${PROJECT_NAME} ${OPENSSL_LIBRARIES} ${Boost_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} ${CMAKE_THREAD_LIBS_INIT} ${OPENSSL_LIBRARIES} ${Boost_LIBRARIES} ${GTEST_LIBRARY} ${GTEST_MAIN_LIBRARY})
 
+# example library
+add_library(client_lib ${SRC_DIR}/client.cpp)
 
 # Test target
 add_executable(
@@ -51,21 +61,13 @@ add_executable(
     ${TEST_DIR}/client_tests.cpp
 )
 
-# Add src to the include directories for the test target
-target_include_directories(
-    ${TEST_NAME} PRIVATE    
-	${SRC_DIR}
-	${GTEST_INCLUDE_DIRS}
-	${GTEST_LIBRARY} 
-	${GTEST_INCLUDE_DIR}
-	${GTEST_MAIN_LIBRARY}	
-)
-
 # Link test target against gtest libraries
 target_link_libraries(
 	${TEST_NAME} PRIVATE
 	GTest::gtest 
 	GTest::gtest_main 
+ 	client_lib
+ 	${CMAKE_THREAD_LIBS_INIT} ${OPENSSL_LIBRARIES} ${Boost_LIBRARIES}
 )
 
 add_test(NAME ${TEST_NAME} COMMAND ${TEST_NAME})
@@ -73,27 +75,7 @@ add_test(NAME ${TEST_NAME} COMMAND ${TEST_NAME})
 # properties
 set_target_properties(${PROJECT_NAME} PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)
 set_target_properties(${TEST_NAME} PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)
-
-if (MSVC)
-    target_compile_options(
-        client PRIVATE
-        /W4
-    )
-    target_compile_options(
-        test_myvector PRIVATE
-        /W4
-    )
-else ()
-    target_compile_options(
-        client PRIVATE
-        -Wall -Wextra -pedantic -Werror
-    )
-    target_compile_options(
-        test_client PRIVATE
-        -Wall -Wextra -pedantic -Werror
-    )
-endif()
-
+set_target_properties(client_lib PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)
 
 #--------------------------------------------------------------------------------------------------
 # deb pkg
