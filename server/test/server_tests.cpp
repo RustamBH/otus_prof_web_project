@@ -2,8 +2,6 @@
 #include "../src/server.hpp"
 #include "../src/server.cpp"
 
-using namespace https_server;
-
 TEST(RequestHandlerTest, HandleValidRequest) {
 	net::io_context ioc;
 	ssl::context ctx{ ssl::context::tlsv12_client };
