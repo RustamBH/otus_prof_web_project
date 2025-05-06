@@ -19,6 +19,7 @@ namespace https_client {
     public:
         explicit HttpsClient(net::io_context& ioc, ssl::context& ctx);
         void request(const std::string& host, const std::string& port, const std::string& target);
+        std::string get_response();
 
     private:
         void on_resolve(beast::error_code ec, tcp::resolver::results_type results);
