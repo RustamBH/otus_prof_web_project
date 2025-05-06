@@ -68,3 +68,11 @@ TEST(RequestHandlerTest, HandleUnsupportedMethod) {
 	
 	EXPECT_TRUE(response.find("HTTP/1.1 405 Method Not Allowed") != std::string::npos);	
 }
+
+int main(int argc, char *argv[])
+{
+	testing::InitGoogleTest(&argc, argv);
+	return RUN_ALL_TESTS();
+}
+
+
