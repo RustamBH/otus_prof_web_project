@@ -13,7 +13,7 @@ namespace https_server {
         : stream_(std::move(socket), ctx), doc_root_(doc_root), thread_pool_(thread_pool) {};
 
     void http_connection::start() {
-        // Асинхронное handshake SSL
+        // РђСЃРёРЅС…СЂРѕРЅРЅРѕРµ handshake SSL
         stream_.async_handshake(
             ssl::stream_base::server,
             [self = shared_from_this()](const boost::system::error_code& error) {
@@ -33,7 +33,7 @@ namespace https_server {
             request_,
             [this, self](beast::error_code ec, std::size_t bytes_transferred) {
                 if (!ec) {
-                    // Передача обработки запроса в пул потоков
+                    // ГЏГҐГ°ГҐГ¤Г Г·Г  Г®ГЎГ°Г ГЎГ®ГІГЄГЁ Г§Г ГЇГ°Г®Г±Г  Гў ГЇГіГ« ГЇГ®ГІГ®ГЄГ®Гў
                     thread_pool_.enqueue([self = shared_from_this()] {
                         self->process_request();
                         });
@@ -46,7 +46,7 @@ namespace https_server {
             response_.version(request_.version());
             response_.keep_alive(false);
 
-            // Проверяем метод (поддерживаем только GET)
+            // РџСЂРѕРІРµСЂСЏРµРј РјРµС‚РѕРґ (РїРѕРґРґРµСЂР¶РёРІР°РµРј С‚РѕР»СЊРєРѕ GET)
             if (request_.method() != http::verb::get) {
                 response_.result(http::status::bad_request);
                 response_.set(http::field::content_type, "text/plain");
@@ -54,7 +54,7 @@ namespace https_server {
                 return write_response();
             }
 
-            // Безопасное формирование пути к файлу
+            // Р‘РµР·РѕРїР°СЃРЅРѕРµ С„РѕСЂРјРёСЂРѕРІР°РЅРёРµ РїСѓС‚Рё Рє С„Р°Р№Р»Сѓ
             std::string request_path = std::string{ request_.target() };
             if (request_path.empty() || request_path[0] != '/' ||
                 request_path.find("..") != std::string::npos) {
@@ -64,15 +64,15 @@ namespace https_server {
                 return write_response();
             }
 
-            // Если запрос заканчивается на /, добавляем index.html
+            // Р•СЃР»Рё Р·Р°РїСЂРѕСЃ Р·Р°РєР°РЅС‡РёРІР°РµС‚СЃСЏ РЅР° /, РґРѕР±Р°РІР»СЏРµРј index.html
             if (request_path.back() == '/') {
                 request_path += "index.html";
             }
 
-            // Формируем полный путь к файлу
+            // Р¤РѕСЂРјРёСЂСѓРµРј РїРѕР»РЅС‹Р№ РїСѓС‚СЊ Рє С„Р°Р№Р»Сѓ
             std::string full_path = doc_root_ + request_path;
 
-            // Пытаемся открыть файл
+            // РџС‹С‚Р°РµРјСЃСЏ РѕС‚РєСЂС‹С‚СЊ С„Р°Р№Р»
             std::ifstream file(full_path, std::ios::in | std::ios::binary);
             if (!file) {
                 response_.result(http::status::not_found);
@@ -81,12 +81,12 @@ namespace https_server {
                 return write_response();
             }
 
-            // Читаем файл и формируем ответ
+            // Р§РёС‚Р°РµРј С„Р°Р№Р» Рё С„РѕСЂРјРёСЂСѓРµРј РѕС‚РІРµС‚
             std::ostringstream file_content;
             file_content << file.rdbuf();
             response_.result(http::status::ok);
 
-            // Определяем Content-Type по расширению файла
+            // РћРїСЂРµРґРµР»СЏРµРј Content-Type РїРѕ СЂР°СЃС€РёСЂРµРЅРёСЋ С„Р°Р№Р»Р°
             std::string content_type = "text/plain";
             if (full_path.find(".html") != std::string::npos) {
                 content_type = "text/html";
@@ -110,7 +110,7 @@ namespace https_server {
             write_response();
         }
         catch (const std::exception& e) {
-            // Если файл не найден, отправляем 404            
+            // Р•СЃР»Рё С„Р°Р№Р» РЅРµ РЅР°Р№РґРµРЅ, РѕС‚РїСЂР°РІР»СЏРµРј 404        
             response_.set(http::field::server, "Boost.Asio HTTPS Server");
             response_.set(http::field::content_type, "text/html");
             beast::ostream(response_.body()) << "404 Not Found\n";
@@ -127,10 +127,10 @@ namespace https_server {
             stream_,
             response_,
             [self](beast::error_code ec, std::size_t) {
-                // После отправки ответа закрываем соединение
+                // РџРѕСЃР»Рµ РѕС‚РїСЂР°РІРєРё РѕС‚РІРµС‚Р° Р·Р°РєСЂС‹РІР°РµРј СЃРѕРµРґРёРЅРµРЅРёРµ
                 self->stream_.async_shutdown(
                     [self](beast::error_code ec) {
-                        // Игнорируем ошибку shutdown
+                        // Г€ГЈГ­Г®Г°ГЁГ°ГіГҐГ¬ Г®ГёГЁГЎГЄГі shutdown
                         if (ec == net::error::eof || ec == ssl::error::stream_truncated) {
                             ec = {};
                         }
@@ -146,14 +146,14 @@ namespace https_server {
     : acceptor_(ioc), ctx_(ctx), doc_root_(doc_root), thread_pool_(thread_pool_size) {
     beast::error_code ec;
 
-    // Открываем acceptor
+    // РћС‚РєСЂС‹РІР°РµРј acceptor
     acceptor_.open(endpoint.protocol(), ec);
     if (ec) {
         std::cerr << "open: " << ec.message() << "\n";
         return;
     }
 
-    // Устанавливаем опцию reuse address
+    // РЈСЃС‚Р°РЅР°РІР»РёРІР°РµРј РѕРїС†РёСЋ reuse address
     acceptor_.set_option(net::socket_base::reuse_address(true), ec);
     if (ec) {
             std::cerr << "set_option: " << ec.message() << "\n";
@@ -167,7 +167,7 @@ namespace https_server {
             return;
         }
 
-        // Начинаем слушать
+        // РќР°С‡РёРЅР°РµРј СЃР»СѓС€Р°С‚СЊ
         acceptor_.listen(net::socket_base::max_listen_connections, ec);
         if (ec) {
             std::cerr << "listen: " << ec.message() << "\n";
